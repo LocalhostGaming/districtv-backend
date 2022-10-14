@@ -14,6 +14,7 @@ import { UsersService } from './users.service';
 import { UserSchema } from './users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Prisma } from '@prisma/client';
 
 @ApiTags('Users')
 @Controller('users')
@@ -26,18 +27,29 @@ export class UsersController {
     description: 'Create User',
     type: CreateUserDto,
   })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(@Body() data: CreateUserDto) {
+    return this.usersService.create(data);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Body()
+    payload: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.UserWhereUniqueInput;
+      where?: Prisma.UserWhereInput;
+      orderBy?: Prisma.UserOrderByWithRelationInput;
+    },
+  ) {
+    return this.usersService.findAll(payload);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOneById(@Param('id') id: string) {
+    return this.usersService.findOne({
+      id,
+    });
   }
 
   @Patch(':id')
