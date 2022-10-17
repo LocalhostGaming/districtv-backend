@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { UseZodGuard } from 'nestjs-zod';
@@ -15,6 +16,7 @@ import { UserSchema } from './users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Prisma } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -31,6 +33,7 @@ export class UsersController {
     return this.usersService.create(data);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(
     @Body()
@@ -45,6 +48,7 @@ export class UsersController {
     return this.usersService.findAll(payload);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOneById(@Param('id') id: string) {
     return this.usersService.findOne({
@@ -52,6 +56,7 @@ export class UsersController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @UseZodGuard('body', UserSchema.partial())
   @ApiBody({
@@ -62,6 +67,7 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
