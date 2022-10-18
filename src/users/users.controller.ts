@@ -12,11 +12,11 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { UseZodGuard } from 'nestjs-zod';
 
 import { UsersService } from './users.service';
-import { UserSchema } from './users.schema';
+import { UserSchema } from './schema/users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Prisma } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/jwt/auth.guard';
+import { JwtAuthGuard } from 'src/guards/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')

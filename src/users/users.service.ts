@@ -13,7 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   UserAlreadyExistsException,
   UserRecordNotFoundException,
-} from './users.exception';
+} from 'src/errors';
 
 const DEFAULT_SELECT = {
   id: true,
