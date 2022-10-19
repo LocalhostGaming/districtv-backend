@@ -30,6 +30,11 @@
 
 ```bash
 $ pnpm install
+```
+
+## Prisma Setup
+
+```bash
 $ pnpm prisma init
 $ pnpm prisma migrate dev --name "init"
 ```
