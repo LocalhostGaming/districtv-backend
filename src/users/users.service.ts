@@ -13,9 +13,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   UserAlreadyExistsException,
   UserRecordNotFoundException,
-} from './users.exception';
+} from 'src/errors';
 
-const DEFAULT_SELECT: Prisma.UserSelect = {
+const DEFAULT_SELECT = {
   id: true,
   username: true,
   email: true,
@@ -69,6 +69,16 @@ export class UsersService {
     return await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
       select: DEFAULT_SELECT,
+    });
+  }
+
+  async findOneWithPassword(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
+    return await this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+      select: {
+        ...DEFAULT_SELECT,
+        password: true,
+      },
     });
   }
 
