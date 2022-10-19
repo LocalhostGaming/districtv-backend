@@ -19,9 +19,9 @@ import { UsersService } from './users.service';
 import { UserSchema } from './schema/users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Roles } from 'src/decorators';
-import { Role } from 'src/enums';
-import { RolesGuard } from 'src/guards';
+import { RolesGuard } from 'src/roles/roles.guards';
+import { Roles } from 'src/roles/roles.decorators';
+import { Role } from 'src/roles/roles.enums';
 
 @ApiTags('Users')
 @Controller('users')
