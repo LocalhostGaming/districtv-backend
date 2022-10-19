@@ -9,14 +9,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { Prisma } from '@prisma/client';
 import { UseZodGuard } from 'nestjs-zod';
+
+import { JwtAuthGuard } from 'src/auth/guards';
 
 import { UsersService } from './users.service';
 import { UserSchema } from './schema/users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Prisma } from '@prisma/client';
-import { JwtAuthGuard } from 'src/guards/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
