@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ENV } from 'src/constants/ENV';
-import { UnauthorizedException } from 'src/errors';
+import { InvalidCredentialsException } from 'src/errors';
 import { AuthService } from '../auth.service';
 
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -21,7 +21,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       payload.password,
     );
 
-    if (!user) throw new UnauthorizedException();
+    if (!user) throw new InvalidCredentialsException();
 
     return user;
   }
