@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
@@ -23,6 +24,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  profile(@Request() request) {
+    return request.user;
+  }
 
   @Post()
   @UseZodGuard('body', UserSchema)
