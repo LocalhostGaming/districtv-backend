@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ENV } from 'src/constants/ENV';
 import { JwtToken } from '../auth.interface';
 import { UsersService } from 'src/users/users.service';
-import { UnauthorizedException } from 'src/errors';
+import { InvalidCredentialsException } from 'src/errors';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(token: JwtToken) {
     const user = this.userService.findOne({ id: token.sub });
 
-    if (!user) throw new UnauthorizedException();
+    if (!user) throw new InvalidCredentialsException();
 
     return user;
   }

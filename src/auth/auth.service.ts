@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { UnauthorizedException } from 'src/errors/auth.exception';
+import { InvalidCredentialsException } from 'src/errors/auth.exception';
 
 import { UsersService } from '../users/users.service';
 
@@ -16,7 +16,7 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findOneWithPassword({ username });
 
-    if (!user) throw new UnauthorizedException();
+    if (!user) throw new InvalidCredentialsException();
 
     const isPasswordValid = await argon2.verify(user.password, password);
 
