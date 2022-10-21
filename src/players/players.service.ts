@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Player, Prisma } from '@prisma/client';
 import {
   DUPLICATE_KEY_ERROR_CODE,
   RECORD_NOT_FOUND_ERROR_CODE,
@@ -14,7 +14,7 @@ import { UpdatePlayerDto } from './dto/update-player.dto';
 export class PlayersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createPlayerDto: CreatePlayerDto) {
+  async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
     try {
       return await this.prisma.player.create({
         data: createPlayerDto,
@@ -37,19 +37,21 @@ export class PlayersService {
     cursor?: Prisma.PlayerWhereUniqueInput;
     where?: Prisma.PlayerWhereInput;
     orderBy?: Prisma.PlayerOrderByWithRelationInput;
-  }) {
+  }): Promise<Player[]> {
     return await this.prisma.player.findMany({
       ...params,
     });
   }
 
-  async findOne(playerWhereUniqueInput: Prisma.PlayerWhereUniqueInput) {
+  async findOne(
+    playerWhereUniqueInput: Prisma.PlayerWhereUniqueInput,
+  ): Promise<Player | null> {
     return await this.prisma.player.findUnique({
       where: playerWhereUniqueInput,
     });
   }
 
-  async update(id: string, data: UpdatePlayerDto) {
+  async update(id: string, data: UpdatePlayerDto): Promise<Player> {
     try {
       return await this.prisma.player.update({
         where: {
@@ -69,7 +71,7 @@ export class PlayersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Player> {
     try {
       return await this.prisma.player.delete({
         where: {
