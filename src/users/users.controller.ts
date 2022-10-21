@@ -9,7 +9,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { UseZodGuard } from 'nestjs-zod';
 
@@ -29,24 +29,22 @@ import { Role } from 'src/roles/roles.enums';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  profile(@Request() request) {
-    return request.user;
-  }
-
+  // CREATE USER
   @Post()
   @UseZodGuard('body', UserSchema)
   @ApiBody({
     description: 'Create User',
     type: CreateUserDto,
   })
+  @ApiOperation({ summary: 'Create new user' })
   create(@Body() data: CreateUserDto) {
     return this.usersService.create(data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // GET ALL USERS
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all users' })
   findAll(
     @Body()
     payload: {
@@ -60,28 +58,42 @@ export class UsersController {
     return this.usersService.findAll(payload);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // GET SINGLE USER
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get single user' })
   findOneById(@Param('id') id: string) {
     return this.usersService.findOne({
       id,
     });
   }
 
+  // GET LOGGED IN USER
+  @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get currently logged in user details' })
+  profile(@Request() request) {
+    return request.user;
+  }
+
+  // UPDATE USER
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @UseZodGuard('body', UserSchema.partial())
   @ApiBody({
     description: 'Update User',
     type: UpdateUserDto,
   })
+  @ApiOperation({ summary: 'Update user' })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
+  // DELETE USER
+  @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin)
-  @Delete(':id')
+  @ApiOperation({ summary: 'Delete user' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
