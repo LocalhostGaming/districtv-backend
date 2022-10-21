@@ -14,6 +14,7 @@ import {
   UserAlreadyExistsException,
   UserRecordNotFoundException,
 } from 'src/errors';
+import { isPrismaKnownError } from 'src/helpers/prismaError';
 
 const DEFAULT_SELECT = {
   id: true,
@@ -42,7 +43,7 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        isPrismaKnownError(error) &&
         error.code === DUPLICATE_KEY_ERROR_CODE
       ) {
         throw new UserAlreadyExistsException();
@@ -93,7 +94,7 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        isPrismaKnownError(error) &&
         error.code === RECORD_NOT_FOUND_ERROR_CODE
       ) {
         throw new UserRecordNotFoundException();
@@ -113,7 +114,7 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        isPrismaKnownError(error) &&
         error.code === RECORD_NOT_FOUND_ERROR_CODE
       ) {
         throw new UserRecordNotFoundException();
