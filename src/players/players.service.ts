@@ -39,9 +39,19 @@ export class PlayersService {
     try {
       const { citizen: citizenPayload, userId } = payload;
 
-      const user = await this.userService.findOne({ id: userId });
+      // Check if user exists
+      const hasUser = await this.userService.findOne({ id: userId });
 
-      if (!user) throw new RecordNotFoundException({ model: 'User' });
+      if (!hasUser) throw new RecordNotFoundException({ model: 'User' });
+
+      // Check if user has a player (one player per user only for now)
+      const hasPlayer = await this.findAll({
+        where: {
+          userId,
+        },
+      });
+
+      if (hasPlayer) throw new AlreadyExistsException({ model: 'Player' });
 
       // Create Player Citizen
       const citizen = await this.citizenService.create(citizenPayload);
