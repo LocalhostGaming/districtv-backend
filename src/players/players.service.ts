@@ -1,30 +1,111 @@
 import { Injectable } from '@nestjs/common';
 import { Player, Prisma } from '@prisma/client';
+import { CitizenService } from 'src/citizen/citizen.service';
 import {
-  DUPLICATE_KEY_ERROR_CODE,
-  RECORD_NOT_FOUND_ERROR_CODE,
+  ERROR_CODE_DUPLICATE_KEY,
+  ERROR_CODE_RECORD_NOT_FOUND,
 } from 'src/constants/ERROR_CODES';
 import { AlreadyExistsException, RecordNotFoundException } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
+import { prismaSelect } from 'src/helpers/prismaSelect';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
 
+const citizenSelect = prismaSelect<Prisma.CitizenSelect>([
+  'firstName',
+  'lastName',
+  'dob',
+  'gender',
+]);
+
+const userSelect = prismaSelect<Prisma.UserSelect>([
+  'username',
+  'email',
+  'createdAt',
+  'updatedAt',
+]);
+
 @Injectable()
 export class PlayersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private citizenService: CitizenService,
+    private userService: UsersService,
+  ) {}
 
-  async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
+  async create(payload: CreatePlayerDto): Promise<Player> {
     try {
-      return await this.prisma.player.create({
-        data: createPlayerDto,
+      const { citizen: citizenPayload, userId } = payload;
+
+      const user = await this.userService.findOne({ id: userId });
+
+      if (!user) throw new RecordNotFoundException({ model: 'User' });
+
+      // Create Player Citizen
+      const citizen = await this.citizenService.create(citizenPayload);
+
+      // Create Player Position
+
+      // Create Player Stats
+
+      const player = await this.prisma.player.create({
+        data: {
+          userId,
+          citizenId: citizen.id,
+        },
+        include: {
+          citizen: {
+            select: citizenSelect,
+          },
+          position: true,
+          stats: true,
+          user: {
+            select: userSelect,
+          },
+        },
       });
+
+      return player;
     } catch (error) {
       if (
         isPrismaKnownError(error) &&
-        error.code === DUPLICATE_KEY_ERROR_CODE
+        error.code === ERROR_CODE_DUPLICATE_KEY
       ) {
         throw new AlreadyExistsException({ model: 'Player' });
+      }
+
+      throw error;
+    }
+  }
+
+  async update(playerId: string, payload: UpdatePlayerDto): Promise<Player> {
+    try {
+      const { citizen: citizenPayload, ...playerPayload } = payload;
+
+      const player = await this.prisma.player.update({
+        where: {
+          id: playerId,
+        },
+        data: playerPayload,
+      });
+
+      // Update Player Citizen
+      if (citizenPayload) {
+        if (!player.citizenId)
+          throw new RecordNotFoundException({ model: 'Citizen' });
+
+        this.citizenService.update(player.citizenId, citizenPayload);
+      }
+
+      return player;
+    } catch (error) {
+      if (
+        isPrismaKnownError(error) &&
+        error.code === ERROR_CODE_RECORD_NOT_FOUND
+      ) {
+        throw new RecordNotFoundException({ model: 'Player' });
       }
 
       throw error;
@@ -46,29 +127,23 @@ export class PlayersService {
   async findOne(
     playerWhereUniqueInput: Prisma.PlayerWhereUniqueInput,
   ): Promise<Player | null> {
-    return await this.prisma.player.findUnique({
+    const player = await this.prisma.player.findUnique({
       where: playerWhereUniqueInput,
-    });
-  }
-
-  async update(id: string, data: UpdatePlayerDto): Promise<Player> {
-    try {
-      return await this.prisma.player.update({
-        where: {
-          id,
+      include: {
+        citizen: {
+          select: citizenSelect,
         },
-        data,
-      });
-    } catch (error) {
-      if (
-        isPrismaKnownError(error) &&
-        error.code === RECORD_NOT_FOUND_ERROR_CODE
-      ) {
-        throw new RecordNotFoundException({ model: 'Player' });
-      }
+        position: true,
+        stats: true,
+        user: {
+          select: userSelect,
+        },
+      },
+    });
 
-      throw error;
-    }
+    if (!player) throw new RecordNotFoundException({ model: 'Player' });
+
+    return player;
   }
 
   async remove(id: string): Promise<Player> {
@@ -81,7 +156,7 @@ export class PlayersService {
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === RECORD_NOT_FOUND_ERROR_CODE
+        error.code === ERROR_CODE_RECORD_NOT_FOUND
       ) {
         throw new RecordNotFoundException({ model: 'Player' });
       }

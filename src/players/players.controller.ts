@@ -16,7 +16,7 @@ import { RolesGuard } from 'src/roles/roles.guards';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { UseZodGuard } from 'nestjs-zod';
-import { PlayerSchema } from './schema/player.schema';
+import { PlayerPayloadSchema } from './schema/player.schema';
 import { Roles } from 'src/roles/roles.decorators';
 import { Role } from 'src/roles/roles.enums';
 
@@ -28,6 +28,7 @@ export class PlayersController {
 
   // CREATE PLAYER
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'Create Player',
     type: CreatePlayerDto,
@@ -65,7 +66,7 @@ export class PlayersController {
   // UPDATE PLAYER
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  @UseZodGuard('body', PlayerSchema.partial())
+  @UseZodGuard('body', PlayerPayloadSchema.partial())
   @ApiOperation({ summary: 'Update player' })
   update(@Param('id') id: string, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playersService.update(id, updatePlayerDto);
