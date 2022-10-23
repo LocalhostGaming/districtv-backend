@@ -17,4 +17,58 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Player    Player[]
+}
+
+model Player {
+  id         String          @id @default(uuid())
+  user       User            @relation(fields: [userId], references: [id])
+  userId     String
+  citizen    Citizen?        @relation(fields: [citizenId], references: [id])
+  citizenId  String?         @unique
+  position   PlayerPosition? @relation(fields: [positionId], references: [id])
+  positionId String?         @unique
+  stats      PlayerStats?    @relation(fields: [statsId], references: [id])
+  statsId    String?         @unique
+  role       Role            @default(PLAYER)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model PlayerPosition {
+  id      String  @id @default(uuid())
+  x       Int
+  y       Int
+  z       Int
+  heading Int
+  Player  Player?
+}
+
+model PlayerStats {
+  id     String  @id @default(uuid())
+  health Int     @default(100)
+  hunger Int     @default(100)
+  thirst Int     @default(100)
+  armor  Int     @default(0)
+  Player Player?
+}
+
+model Citizen {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  dob       DateTime
+  gender    Gender
+  Player    Player?
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum Role {
+  ADMIN
+  PLAYER
 }

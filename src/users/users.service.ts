@@ -4,8 +4,8 @@ import * as argon2 from 'argon2';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  DUPLICATE_KEY_ERROR_CODE,
-  RECORD_NOT_FOUND_ERROR_CODE,
+  ERROR_CODE_DUPLICATE_KEY,
+  ERROR_CODE_RECORD_NOT_FOUND,
 } from 'src/constants/ERROR_CODES';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,6 +14,7 @@ import {
   UserAlreadyExistsException,
   UserRecordNotFoundException,
 } from 'src/errors';
+import { isPrismaKnownError } from 'src/helpers/prismaError';
 
 const DEFAULT_SELECT = {
   id: true,
@@ -42,8 +43,8 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === DUPLICATE_KEY_ERROR_CODE
+        isPrismaKnownError(error) &&
+        error.code === ERROR_CODE_DUPLICATE_KEY
       ) {
         throw new UserAlreadyExistsException();
       }
@@ -93,8 +94,8 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === RECORD_NOT_FOUND_ERROR_CODE
+        isPrismaKnownError(error) &&
+        error.code === ERROR_CODE_RECORD_NOT_FOUND
       ) {
         throw new UserRecordNotFoundException();
       }
@@ -113,8 +114,8 @@ export class UsersService {
       });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === RECORD_NOT_FOUND_ERROR_CODE
+        isPrismaKnownError(error) &&
+        error.code === ERROR_CODE_RECORD_NOT_FOUND
       ) {
         throw new UserRecordNotFoundException();
       }
