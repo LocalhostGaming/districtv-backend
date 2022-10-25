@@ -9,7 +9,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { UseZodGuard } from 'nestjs-zod';
 
@@ -24,6 +24,7 @@ import { Roles } from 'src/roles/roles.decorators';
 import { Role } from 'src/roles/roles.enums';
 
 @ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 @UseGuards(RolesGuard)
 export class UsersController {

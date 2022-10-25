@@ -13,7 +13,7 @@ import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { Prisma } from '@prisma/client';
 import { RolesGuard } from 'src/roles/roles.guards';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { UseZodGuard } from 'nestjs-zod';
 import { PlayerPayloadSchema } from './schema/player.schema';
@@ -21,6 +21,7 @@ import { Roles } from 'src/roles/roles.decorators';
 import { Role } from 'src/roles/roles.enums';
 
 @ApiTags('Players')
+@ApiBearerAuth()
 @Controller('players')
 @UseGuards(RolesGuard)
 export class PlayersController {

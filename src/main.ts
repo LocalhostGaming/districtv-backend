@@ -16,6 +16,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('District V')
     .setDescription('District V Roleplay Backend API')
     .setVersion('0.1')
