@@ -15,6 +15,7 @@ export class AuthController {
     type: LoginDto,
   })
   async login(@Request() request) {
+    console.log('login', request.user);
     return this.authService.login(request.user);
   }
 }

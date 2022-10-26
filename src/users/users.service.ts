@@ -17,7 +17,7 @@ import {
 import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { prismaSelect } from 'src/helpers/prismaSelect';
 
-const userSelectWithPassword = prismaSelect(
+const userSelectWithPassword = prismaSelect<Prisma.UserSelect>(
   'password',
   'id',
   'email',
@@ -26,7 +26,7 @@ const userSelectWithPassword = prismaSelect(
   'updatedAt',
 );
 
-const userSelect = prismaSelect(
+const userSelect = prismaSelect<Prisma.UserSelect>(
   'id',
   'username',
   'email',

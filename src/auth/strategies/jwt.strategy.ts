@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(token: JwtToken) {
-    const user = this.userService.findOne({ id: token.sub });
+    const user = await this.userService.findOne({ id: token.sub });
 
     if (!user) throw new InvalidCredentialsException();
 

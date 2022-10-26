@@ -59,6 +59,14 @@ export class UsersController {
     return this.usersService.findAll(payload);
   }
 
+  // GET LOGGED IN USER
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get currently logged in user details' })
+  profile(@Request() request) {
+    return request.user;
+  }
+
   // GET SINGLE USER
   @Get(':id')
   @UseGuards(JwtAuthGuard)
@@ -67,14 +75,6 @@ export class UsersController {
     return this.usersService.findOne({
       id,
     });
-  }
-
-  // GET LOGGED IN USER
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Get currently logged in user details' })
-  profile(@Request() request) {
-    return request.user;
   }
 
   // UPDATE USER
