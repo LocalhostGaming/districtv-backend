@@ -13,19 +13,8 @@ import { UsersService } from 'src/users/users.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
 
-const citizenSelect = prismaSelect<Prisma.CitizenSelect>([
-  'firstName',
-  'lastName',
-  'dob',
-  'gender',
-]);
-
-const userSelect = prismaSelect<Prisma.UserSelect>([
-  'username',
-  'email',
-  'createdAt',
-  'updatedAt',
-]);
+const citizenSelect = prismaSelect('firstName', 'lastName', 'dob', 'gender');
+const userSelect = prismaSelect('username', 'email', 'createdAt', 'updatedAt');
 
 @Injectable()
 export class PlayersService {

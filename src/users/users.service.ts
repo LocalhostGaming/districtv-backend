@@ -15,14 +15,24 @@ import {
   UserRecordNotFoundException,
 } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
+import { prismaSelect } from 'src/helpers/prismaSelect';
 
-const DEFAULT_SELECT = {
-  id: true,
-  username: true,
-  email: true,
-  createdAt: true,
-  updatedAt: true,
-};
+const userSelectWithPassword = prismaSelect(
+  'password',
+  'id',
+  'email',
+  'username',
+  'createdAt',
+  'updatedAt',
+);
+
+const userSelect = prismaSelect(
+  'id',
+  'username',
+  'email',
+  'createdAt',
+  'updatedAt',
+);
 
 @Injectable()
 export class UsersService {
@@ -39,7 +49,7 @@ export class UsersService {
           ...data,
           password: hash,
         },
-        select: DEFAULT_SELECT,
+        select: userSelect,
       });
     } catch (error) {
       if (
@@ -62,24 +72,21 @@ export class UsersService {
   }) {
     return await this.prisma.user.findMany({
       ...params,
-      select: DEFAULT_SELECT,
+      select: userSelect,
     });
   }
 
   async findOne(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
     return await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
-      select: DEFAULT_SELECT,
+      select: userSelect,
     });
   }
 
   async findOneWithPassword(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
     return await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
-      select: {
-        ...DEFAULT_SELECT,
-        password: true,
-      },
+      select: userSelectWithPassword,
     });
   }
 
@@ -90,7 +97,7 @@ export class UsersService {
           id,
         },
         data,
-        select: DEFAULT_SELECT,
+        select: userSelect,
       });
     } catch (error) {
       if (
@@ -110,7 +117,7 @@ export class UsersService {
         where: {
           id,
         },
-        select: DEFAULT_SELECT,
+        select: userSelect,
       });
     } catch (error) {
       if (
