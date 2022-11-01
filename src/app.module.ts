@@ -5,6 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { PlayersModule } from './players/players.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, PlayersModule, ConfigModule.forRoot()],
+  imports: [AuthModule, UsersModule, PlayersModule, ConfigModule.forRoot()],
 })
 export class AppModule {}
