@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { PlayersService } from './players.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
@@ -19,6 +20,7 @@ import { UseZodGuard } from 'nestjs-zod';
 import { PlayerPayloadSchema } from './schema/player.schema';
 import { Roles } from 'src/roles/roles.decorators';
 import { Role } from 'src/roles/roles.enums';
+import { PlayerGuard } from './guards/player.guard';
 
 @ApiTags('Players')
 @ApiBearerAuth()
@@ -54,6 +56,13 @@ export class PlayersController {
     },
   ) {
     return this.playersService.findAll(payload);
+  }
+
+  @Get('me')
+  @UseGuards(PlayerGuard)
+  @ApiOperation({ summary: 'Get currently logged in player details' })
+  profile(@Request() request) {
+    return request.player;
   }
 
   // GET SINGLE PLAYER

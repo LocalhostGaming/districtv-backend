@@ -160,6 +160,30 @@ export class PlayersService {
     return player;
   }
 
+  async findOneByUserId(userId: string): Promise<Player | null> {
+    const players = await this.prisma.player.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        citizen: {
+          select: citizenSelect,
+        },
+        position: true,
+        stats: true,
+        user: {
+          select: userSelect,
+        },
+      },
+    });
+
+    if (players.length <= 0)
+      throw new RecordNotFoundException({ model: 'Player' });
+
+    // for now users can only have one player
+    return players[0];
+  }
+
   async remove(id: string): Promise<Player> {
     try {
       return await this.prisma.player.delete({
