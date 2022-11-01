@@ -37,8 +37,10 @@ export class PlayersController {
     type: CreatePlayerDto,
   })
   @ApiOperation({ summary: 'Create new player' })
-  create(@Body() createPlayerDto: CreatePlayerDto) {
-    return this.playersService.create(createPlayerDto);
+  create(@Request() request, @Body() createPlayerDto: CreatePlayerDto) {
+    const userId = request.user.id;
+
+    return this.playersService.create(userId, createPlayerDto);
   }
 
   // GET ALL PLAYERS
