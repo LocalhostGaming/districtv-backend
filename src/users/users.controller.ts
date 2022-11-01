@@ -93,7 +93,7 @@ export class UsersController {
   // DELETE USER
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.MASTER)
   @ApiOperation({ summary: 'Delete user' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

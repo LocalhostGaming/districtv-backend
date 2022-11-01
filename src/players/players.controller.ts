@@ -87,7 +87,7 @@ export class PlayersController {
   // DELETE PLAYER
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.MASTER)
   @ApiOperation({ summary: 'Delete player' })
   remove(@Param('id') id: string) {
     return this.playersService.remove(id);
