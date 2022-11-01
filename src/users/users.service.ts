@@ -15,24 +15,7 @@ import {
   UserRecordNotFoundException,
 } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
-import { prismaSelect } from 'src/helpers/prismaSelect';
-
-const userSelectWithPassword = prismaSelect<Prisma.UserSelect>(
-  'password',
-  'id',
-  'email',
-  'username',
-  'createdAt',
-  'updatedAt',
-);
-
-const userSelect = prismaSelect<Prisma.UserSelect>(
-  'id',
-  'username',
-  'email',
-  'createdAt',
-  'updatedAt',
-);
+import { UserSelect } from './users.select';
 
 @Injectable()
 export class UsersService {
@@ -49,7 +32,7 @@ export class UsersService {
           ...data,
           password: hash,
         },
-        select: userSelect,
+        select: UserSelect,
       });
     } catch (error) {
       if (
@@ -72,33 +55,34 @@ export class UsersService {
   }) {
     return await this.prisma.user.findMany({
       ...params,
-      select: userSelect,
+      select: UserSelect,
     });
   }
 
   async findOne(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
     return await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
-      select: userSelect,
+      select: UserSelect,
     });
   }
 
   async findOneWithPassword(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
     return await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
-      select: userSelectWithPassword,
     });
   }
 
   async update(id: string, data: UpdateUserDto) {
     try {
-      return await this.prisma.user.update({
+      const user = await this.prisma.user.update({
         where: {
           id,
         },
         data,
-        select: userSelect,
+        select: UserSelect,
       });
+
+      return user;
     } catch (error) {
       if (
         isPrismaKnownError(error) &&
@@ -117,7 +101,7 @@ export class UsersService {
         where: {
           id,
         },
-        select: userSelect,
+        select: UserSelect,
       });
     } catch (error) {
       if (

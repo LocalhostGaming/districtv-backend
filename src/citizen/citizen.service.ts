@@ -15,7 +15,7 @@ export class CitizenService {
 
   async create(data: CreateCitizenDto) {
     try {
-      return this.prisma.citizen.create({
+      return this.prisma.playerCitizen.create({
         data,
       });
     } catch (error) {
@@ -32,7 +32,7 @@ export class CitizenService {
 
   async update(id: string, data: UpdateCitizenDto) {
     try {
-      return this.prisma.citizen.update({
+      return this.prisma.playerCitizen.update({
         where: {
           id,
         },

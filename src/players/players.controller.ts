@@ -32,6 +32,7 @@ export class PlayersController {
   // CREATE PLAYER
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseZodGuard('body', PlayerPayloadSchema)
   @ApiBody({
     description: 'Create Player',
     type: CreatePlayerDto,

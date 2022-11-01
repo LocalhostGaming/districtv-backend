@@ -7,45 +7,16 @@ import {
 } from 'src/constants/ERROR_CODES';
 import { AlreadyExistsException, RecordNotFoundException } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
-import { prismaSelect } from 'src/helpers/prismaSelect';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UsersService } from 'src/users/users.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
-
-const citizenSelect = prismaSelect<Prisma.CitizenSelect>(
-  'id',
-  'firstName',
-  'lastName',
-  'dob',
-  'gender',
-);
-
-const userSelect = prismaSelect<Prisma.UserSelect>(
-  'id',
-  'username',
-  'email',
-  'createdAt',
-  'updatedAt',
-);
-
-const playerSelect = prismaSelect<Prisma.PlayerSelect>(
-  'id',
-  'citizen',
-  'position',
-  'role',
-  'createdAt',
-  'updatedAt',
-  'stats',
-  'user',
-);
+import { PlayerSelect } from './player.select';
 
 @Injectable()
 export class PlayersService {
   constructor(
     private prisma: PrismaService,
     private citizenService: CitizenService,
-    private userService: UsersService,
   ) {}
 
   async create(userId: string, payload: CreatePlayerDto) {
@@ -59,7 +30,8 @@ export class PlayersService {
         },
       });
 
-      if (hasPlayer) throw new AlreadyExistsException({ model: 'Player' });
+      if (hasPlayer.length > 0)
+        throw new AlreadyExistsException({ model: 'Player' });
 
       // Create Player Citizen
       const citizen = await this.citizenService.create(citizenPayload);
@@ -73,7 +45,7 @@ export class PlayersService {
           userId,
           citizenId: citizen.id,
         },
-        select: playerSelect,
+        select: PlayerSelect,
       });
 
       return player;
@@ -127,27 +99,17 @@ export class PlayersService {
     cursor?: Prisma.PlayerWhereUniqueInput;
     where?: Prisma.PlayerWhereInput;
     orderBy?: Prisma.PlayerOrderByWithRelationInput;
-  }): Promise<Player[]> {
+  }) {
     return await this.prisma.player.findMany({
       ...params,
+      select: PlayerSelect,
     });
   }
 
-  async findOne(
-    playerWhereUniqueInput: Prisma.PlayerWhereUniqueInput,
-  ): Promise<Player | null> {
+  async findOne(playerWhereUniqueInput: Prisma.PlayerWhereUniqueInput) {
     const player = await this.prisma.player.findUnique({
       where: playerWhereUniqueInput,
-      include: {
-        citizen: {
-          select: citizenSelect,
-        },
-        position: true,
-        stats: true,
-        user: {
-          select: userSelect,
-        },
-      },
+      select: PlayerSelect,
     });
 
     if (!player) throw new RecordNotFoundException({ model: 'Player' });
@@ -155,21 +117,12 @@ export class PlayersService {
     return player;
   }
 
-  async findOneByUserId(userId: string): Promise<Player | null> {
+  async findOneByUserId(userId: string) {
     const players = await this.prisma.player.findMany({
       where: {
         userId,
       },
-      include: {
-        citizen: {
-          select: citizenSelect,
-        },
-        position: true,
-        stats: true,
-        user: {
-          select: userSelect,
-        },
-      },
+      select: PlayerSelect,
     });
 
     if (players.length <= 0)
