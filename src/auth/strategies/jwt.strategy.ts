@@ -19,8 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(token: JwtToken) {
     const user = await this.userService.findOne({ id: token.sub });
 
-    console.log(user);
-
     if (!user) throw new RecordNotFoundException({ model: 'User' });
 
     return user;
