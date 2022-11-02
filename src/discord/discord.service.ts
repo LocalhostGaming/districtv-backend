@@ -7,6 +7,9 @@ import { ENV } from 'src/constants/ENV';
 import { Intent } from 'src/integration/enums/intent';
 import { URLSearchParams } from 'url';
 import { catchError, map } from 'rxjs';
+import { CreateDiscordDto } from './dto/create-discord.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UpdateDiscordDto } from './dto/update-discord.dto';
 
 const defaultScopes = ['identify', 'email'];
 
@@ -15,7 +18,28 @@ export class DiscordService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly prismaService: PrismaService,
   ) {}
+
+  async create(userId: string, payload: CreateDiscordDto) {
+    return this.prismaService.discordIntegration.create({
+      data: {
+        userId,
+        ...payload,
+      },
+    });
+  }
+
+  async update(id: string, payload: UpdateDiscordDto) {
+    return this.prismaService.discordIntegration.update({
+      where: {
+        id,
+      },
+      data: {
+        ...payload,
+      },
+    });
+  }
 
   async authorizationUrl(intent: Intent) {
     if (!ENV.DISCORD_CLIENT_ID || !ENV.DISCORD_REDIRECT_URI)

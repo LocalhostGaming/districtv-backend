@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ENV } from 'src/constants/ENV';
+import { PrismaModule } from 'src/prisma/prisma.module';
 import { DiscordService } from './discord.service';
 
 @Module({
@@ -11,6 +12,7 @@ import { DiscordService } from './discord.service';
       secret: ENV.ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
+    PrismaModule,
   ],
   providers: [DiscordService],
   exports: [DiscordService],
