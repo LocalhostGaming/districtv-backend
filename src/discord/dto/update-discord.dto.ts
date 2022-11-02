@@ -1,4 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
-import { DiscordSchema } from '../schema/discord.schema';
+import { DiscordIntegrationSchema } from '../schema/discord.schema';
 
-export class UpdateDiscordDto extends createZodDto(DiscordSchema.partial()) {}
+export class UpdateDiscordDto extends createZodDto(
+  DiscordIntegrationSchema.partial(),
+) {}

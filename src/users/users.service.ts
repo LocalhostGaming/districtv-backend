@@ -16,24 +16,52 @@ import {
 } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { UserSelect } from './users.select';
+import { DiscordService } from 'src/discord/discord.service';
+import { firstValueFrom } from 'rxjs';
+import { UnverifiedDiscordException } from 'src/errors/discord.exception';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly discordService: DiscordService,
+  ) {}
 
-  async create(data: CreateUserDto) {
+  async create(
+    data: CreateUserDto,
+    discordAccessToken: string,
+    discordRefreshToken: string,
+  ) {
     const { password } = data;
 
     const hash = await argon2.hash(password);
 
+    const discordMe = await firstValueFrom(
+      await this.discordService.me(discordAccessToken),
+    );
+
+    if (!discordMe.verified) throw new UnverifiedDiscordException();
+
     try {
-      return await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: {
           ...data,
+          email: discordMe.email,
           password: hash,
         },
         select: UserSelect,
       });
+
+      await this.discordService.create(user.id, {
+        avatar: discordMe.avatar,
+        discordId: discordMe.id,
+        discriminator: discordMe.discriminator,
+        email: discordMe.email,
+        username: discordMe.username,
+        refreshToken: discordRefreshToken,
+      });
+
+      return user;
     } catch (error) {
       if (
         isPrismaKnownError(error) &&

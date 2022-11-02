@@ -8,8 +8,15 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { UseZodGuard } from 'nestjs-zod';
 
@@ -37,9 +44,21 @@ export class UsersController {
     description: 'Create User',
     type: CreateUserDto,
   })
+  @ApiQuery({
+    name: 'access_token',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'refresh_token',
+    type: String,
+  })
   @ApiOperation({ summary: 'Create new user' })
-  create(@Body() data: CreateUserDto) {
-    return this.usersService.create(data);
+  create(
+    @Body() data: CreateUserDto,
+    @Query('access_token') accessToken: string,
+    @Query('refresh_token') refreshToken: string,
+  ) {
+    return this.usersService.create(data, accessToken, refreshToken);
   }
 
   // GET ALL USERS

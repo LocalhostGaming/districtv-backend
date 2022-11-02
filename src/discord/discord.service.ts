@@ -10,8 +10,10 @@ import { catchError, map } from 'rxjs';
 import { CreateDiscordDto } from './dto/create-discord.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateDiscordDto } from './dto/update-discord.dto';
+import { DiscordMeResponseDto } from './dto/me-discord.dto';
 
 const defaultScopes = ['identify', 'email'];
+const meURL = 'https://discord.com/api/users/@me';
 
 @Injectable()
 export class DiscordService {
@@ -39,6 +41,23 @@ export class DiscordService {
         ...payload,
       },
     });
+  }
+
+  async me(accessToken: string) {
+    const response = await this.httpService.get<DiscordMeResponseDto>(meURL, {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.pipe(
+      map((response) => response.data),
+      catchError((error) => {
+        const message = error.response.data?.error_description || error.message;
+        Logger.error(message);
+        throw new HttpException(message, error.response.status);
+      }),
+    );
   }
 
   async authorizationUrl(intent: Intent) {
