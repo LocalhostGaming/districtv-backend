@@ -6,7 +6,7 @@ import { DISCORD, GRANT_TYPE } from 'src/constants/DISCORD';
 import { ENV } from 'src/constants/ENV';
 import { Intent } from 'src/integration/enums/intent';
 import { URLSearchParams } from 'url';
-import { map } from 'rxjs';
+import { catchError, map } from 'rxjs';
 
 const defaultScopes = ['identify', 'email'];
 
@@ -43,38 +43,41 @@ export class DiscordService {
   async authorize(code: string, state: string) {
     await this.verifyState(state);
 
-    try {
-      if (
-        !ENV.DISCORD_CLIENT_ID ||
-        !ENV.DISCORD_CLIENT_SECRET ||
-        !ENV.DISCORD_REDIRECT_URI
-      )
-        throw new Error(
-          'DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET and DISCORD_REDIRECT_URI is required',
-        );
-
-      const params = new URLSearchParams({
-        client_id: ENV.DISCORD_CLIENT_ID,
-        client_secret: ENV.DISCORD_CLIENT_SECRET,
-        redirect_uri: ENV.DISCORD_REDIRECT_URI,
-        grant_type: GRANT_TYPE.AUTHORIZATION_CODE,
-        code,
-      });
-
-      const response = await this.httpService.post(
-        DISCORD.TOKEN_URL,
-        params.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
+    if (
+      !ENV.DISCORD_CLIENT_ID ||
+      !ENV.DISCORD_CLIENT_SECRET ||
+      !ENV.DISCORD_REDIRECT_URI
+    )
+      throw new Error(
+        'DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET and DISCORD_REDIRECT_URI is required',
       );
 
-      return response.pipe(map((response) => response.data));
-    } catch (error) {
-      throw new Error((error as any).message);
-    }
+    const params = new URLSearchParams({
+      client_id: ENV.DISCORD_CLIENT_ID,
+      client_secret: ENV.DISCORD_CLIENT_SECRET,
+      redirect_uri: ENV.DISCORD_REDIRECT_URI,
+      grant_type: GRANT_TYPE.AUTHORIZATION_CODE,
+      code,
+    });
+
+    const response = await this.httpService.post(
+      DISCORD.TOKEN_URL,
+      params.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    );
+
+    return response.pipe(
+      map((response) => response.data),
+      catchError((error) => {
+        const message = error.response.data?.error_description || error.message;
+        Logger.error(message);
+        throw new HttpException(message, error.response.status);
+      }),
+    );
   }
 
   async generateState(intent: Intent) {
