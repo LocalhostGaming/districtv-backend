@@ -16,11 +16,11 @@ import {
 } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { UserSelect } from './users.select';
-import { DiscordService } from 'src/discord/discord.service';
 import { firstValueFrom } from 'rxjs';
 import { UnverifiedDiscordException } from 'src/errors/discord.exception';
 import { JwtService } from '@nestjs/jwt';
-import { DiscordAccessTokenDto } from 'src/discord/dto/discord.dto';
+import { DiscordService } from 'src/integration/discord/discord.service';
+import { DiscordAccessTokenDto } from 'src/integration/discord/dto/discord.dto';
 
 @Injectable()
 export class UsersService {

@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ENV } from 'src/constants/ENV';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { DiscordService } from './discord.service';
+import { DiscordController } from './discord.controller';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { DiscordService } from './discord.service';
   ],
   providers: [DiscordService],
   exports: [DiscordService],
+  controllers: [DiscordController],
 })
 export class DiscordModule {}

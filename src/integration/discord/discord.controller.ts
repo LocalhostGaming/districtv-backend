@@ -1,11 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import { DiscordService } from 'src/discord/discord.service';
-import { Intent } from './enums/intent';
+import { Intent } from '../enums/intent';
+import { DiscordService } from './discord.service';
 
-@ApiTags('Integration')
-@Controller('integration')
-export class IntegrationController {
+@ApiTags('Discord Integration')
+@Controller('integration/discord')
+export class DiscordController {
   constructor(private readonly discordService: DiscordService) {}
 
   @Get('discord/verify')

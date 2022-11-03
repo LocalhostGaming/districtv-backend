@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { nanoid } from 'nanoid/async';
 import { DISCORD, GRANT_TYPE } from 'src/constants/DISCORD';
 import { ENV } from 'src/constants/ENV';
-import { Intent } from 'src/integration/enums/intent';
 import { URLSearchParams } from 'url';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -15,6 +14,7 @@ import {
   UpdateDiscordDto,
 } from './dto/discord.dto';
 import { Prisma } from '@prisma/client';
+import { Intent } from '../enums/intent';
 
 const defaultScopes = ['identify', 'email'];
 const meURL = 'https://discord.com/api/users/@me';

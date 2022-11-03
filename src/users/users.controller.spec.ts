@@ -2,7 +2,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtStrategy } from 'src/auth/strategies';
 import { ENV } from 'src/constants/ENV';
-import { DiscordModule } from 'src/discord/discord.module';
+import { DiscordModule } from 'src/integration/discord/discord.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
