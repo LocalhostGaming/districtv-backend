@@ -11,9 +11,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateDiscordDto,
   DiscordMeResponseDto,
-  DiscordTokenDto,
+  DiscordAccessTokenDto,
   UpdateDiscordDto,
 } from './dto/discord.dto';
+import { Prisma } from '@prisma/client';
 
 const defaultScopes = ['identify', 'email'];
 const meURL = 'https://discord.com/api/users/@me';
@@ -35,11 +36,12 @@ export class DiscordService {
     });
   }
 
-  async update(id: string, payload: UpdateDiscordDto) {
+  async update(
+    where: Prisma.DiscordIntegrationWhereUniqueInput,
+    payload: UpdateDiscordDto,
+  ) {
     return this.prismaService.discordIntegration.update({
-      where: {
-        id,
-      },
+      where,
       data: {
         ...payload,
       },
@@ -63,6 +65,11 @@ export class DiscordService {
     );
   }
 
+  /**
+   *
+   * @param intent launcher or website
+   * @returns discord authorization url
+   */
   async authorizationUrl(intent: Intent) {
     if (!ENV.DISCORD_CLIENT_ID || !ENV.DISCORD_REDIRECT_URI)
       throw new Error('DISCORD_CLIENT_ID or DISCORD_REDIRECT_URI is required');
@@ -88,6 +95,12 @@ export class DiscordService {
     };
   }
 
+  /**
+   * This will check if code and state returned from discord is valid
+   * @param code temporary code from discord
+   * @param state signed state with intent and random id
+   * @returns  DiscordAccessTokenDto
+   */
   async authorize(code: string, state: string) {
     await this.verifyState(state);
 
@@ -109,7 +122,7 @@ export class DiscordService {
     });
 
     const response = await this.httpService
-      .post<DiscordTokenDto>(DISCORD.TOKEN_URL, params.toString(), {
+      .post<DiscordAccessTokenDto>(DISCORD.TOKEN_URL, params.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -133,6 +146,52 @@ export class DiscordService {
     };
   }
 
+  /**
+   * This will refresh discord's access_token
+   * @param refreshToken from discord
+   * @returns returns DiscordAccessTokenDto
+   */
+  async refreshToken(userId: string, refreshToken: string) {
+    if (!ENV.DISCORD_CLIENT_ID || !ENV.DISCORD_CLIENT_SECRET)
+      throw new Error(
+        'DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET is required',
+      );
+
+    const params = new URLSearchParams({
+      client_id: ENV.DISCORD_CLIENT_ID,
+      client_secret: ENV.DISCORD_CLIENT_SECRET,
+      grant_type: GRANT_TYPE.REFRESH_TOKEN,
+      refresh_token: refreshToken,
+    });
+
+    const response = await this.httpService
+      .post<DiscordAccessTokenDto>(DISCORD.TOKEN_URL, params.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+      .pipe(
+        map((response) => response.data),
+        catchError((error) => {
+          const message =
+            error.response.data?.error_description || error.message;
+          Logger.error(message);
+          throw new HttpException(message, error.response.status);
+        }),
+      );
+
+    const data = await firstValueFrom(response);
+
+    await this.update({ userId }, { refreshToken: data.refresh_token });
+
+    return data;
+  }
+
+  /**
+   * This will generate signed state for security purposes
+   * @param intent launcher or website
+   * @returns signed state
+   */
   async generateState(intent: Intent) {
     const id = await nanoid();
 
@@ -142,6 +201,11 @@ export class DiscordService {
     return state;
   }
 
+  /**
+   * This will verify if state is valid
+   * @param state signed state
+   * @returns parsed jwt payload object
+   */
   async verifyState(state: string) {
     try {
       const token = Buffer.from(state, 'base64').toString('utf-8');

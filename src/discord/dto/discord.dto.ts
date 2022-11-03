@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import {
   DiscordIntegrationSchema,
   DiscordMeSchema,
-  DiscordTokenSchema,
+  DiscordAccessTokenSchema,
 } from '../schema/discord.schema';
 
 export class CreateDiscordDto extends createZodDto(DiscordIntegrationSchema) {}
@@ -13,4 +13,6 @@ export class UpdateDiscordDto extends createZodDto(
 
 export class DiscordMeResponseDto extends createZodDto(DiscordMeSchema) {}
 
-export class DiscordTokenDto extends createZodDto(DiscordTokenSchema) {}
+export class DiscordAccessTokenDto extends createZodDto(
+  DiscordAccessTokenSchema,
+) {}

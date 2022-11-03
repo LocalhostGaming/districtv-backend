@@ -27,7 +27,7 @@ export const DiscordMeSchema = z.object({
   verified: z.boolean(),
 });
 
-export const DiscordTokenSchema = z.object({
+export const DiscordAccessTokenSchema = z.object({
   access_token: z.string(),
   expires_in: z.number(),
   refresh_token: z.string(),
