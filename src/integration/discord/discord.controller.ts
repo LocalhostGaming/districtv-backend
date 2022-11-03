@@ -8,7 +8,7 @@ import { DiscordService } from './discord.service';
 export class DiscordController {
   constructor(private readonly discordService: DiscordService) {}
 
-  @Get('discord/verify')
+  @Get('verify')
   @ApiQuery({
     name: 'code',
     type: String,
@@ -23,7 +23,7 @@ export class DiscordController {
     return this.discordService.authorize(code, state);
   }
 
-  @Get('discord/authorization-url')
+  @Get('authorization-url')
   @ApiQuery({
     name: 'intent',
     enum: Intent,
