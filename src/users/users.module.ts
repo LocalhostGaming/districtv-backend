@@ -4,9 +4,17 @@ import { UsersController } from './users.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { DiscordModule } from 'src/discord/discord.module';
+import { JwtModule } from '@nestjs/jwt';
+import { ENV } from 'src/constants/ENV';
 
 @Module({
-  imports: [PrismaModule, DiscordModule],
+  imports: [
+    PrismaModule,
+    DiscordModule,
+    JwtModule.register({
+      secret: ENV.JWT_TOKEN_SECRET,
+    }),
+  ],
   controllers: [UsersController],
   providers: [UsersService, JwtStrategy],
   exports: [UsersService],

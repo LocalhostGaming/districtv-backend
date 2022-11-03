@@ -13,8 +13,8 @@ describe('DiscordService', () => {
       imports: [
         HttpModule,
         JwtModule.register({
-          secret: ENV.ACCESS_TOKEN_SECRET,
-          signOptions: { expiresIn: '1d' },
+          secret: ENV.JWT_TOKEN_SECRET,
+          signOptions: { expiresIn: ENV.JWT_TOKEN_EXP },
         }),
         PrismaModule,
       ],

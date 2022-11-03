@@ -6,11 +6,14 @@ import { DISCORD, GRANT_TYPE } from 'src/constants/DISCORD';
 import { ENV } from 'src/constants/ENV';
 import { Intent } from 'src/integration/enums/intent';
 import { URLSearchParams } from 'url';
-import { catchError, map } from 'rxjs';
-import { CreateDiscordDto } from './dto/create-discord.dto';
+import { catchError, firstValueFrom, map } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateDiscordDto } from './dto/update-discord.dto';
-import { DiscordMeResponseDto } from './dto/me-discord.dto';
+import {
+  CreateDiscordDto,
+  DiscordMeResponseDto,
+  DiscordTokenDto,
+  UpdateDiscordDto,
+} from './dto/discord.dto';
 
 const defaultScopes = ['identify', 'email'];
 const meURL = 'https://discord.com/api/users/@me';
@@ -103,24 +106,29 @@ export class DiscordService {
       code,
     });
 
-    const response = await this.httpService.post(
-      DISCORD.TOKEN_URL,
-      params.toString(),
-      {
+    const response = await this.httpService
+      .post<DiscordTokenDto>(DISCORD.TOKEN_URL, params.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-      },
-    );
+      })
+      .pipe(
+        map((response) => response.data),
+        catchError((error) => {
+          const message =
+            error.response.data?.error_description || error.message;
+          Logger.error(message);
+          throw new HttpException(message, error.response.status);
+        }),
+      );
 
-    return response.pipe(
-      map((response) => response.data),
-      catchError((error) => {
-        const message = error.response.data?.error_description || error.message;
-        Logger.error(message);
-        throw new HttpException(message, error.response.status);
-      }),
-    );
+    const data = await firstValueFrom(response);
+
+    const tokens = this.jwtService.sign(data);
+
+    return {
+      tokens,
+    };
   }
 
   async generateState(intent: Intent) {

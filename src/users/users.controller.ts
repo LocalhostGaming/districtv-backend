@@ -45,20 +45,12 @@ export class UsersController {
     type: CreateUserDto,
   })
   @ApiQuery({
-    name: 'access_token',
-    type: String,
-  })
-  @ApiQuery({
-    name: 'refresh_token',
+    name: 'tokens',
     type: String,
   })
   @ApiOperation({ summary: 'Create new user' })
-  create(
-    @Body() data: CreateUserDto,
-    @Query('access_token') accessToken: string,
-    @Query('refresh_token') refreshToken: string,
-  ) {
-    return this.usersService.create(data, accessToken, refreshToken);
+  create(@Body() data: CreateUserDto, @Query('tokens') tokens: string) {
+    return this.usersService.create(data, tokens);
   }
 
   // GET ALL USERS

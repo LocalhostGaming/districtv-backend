@@ -19,25 +19,26 @@ import { UserSelect } from './users.select';
 import { DiscordService } from 'src/discord/discord.service';
 import { firstValueFrom } from 'rxjs';
 import { UnverifiedDiscordException } from 'src/errors/discord.exception';
+import { JwtService } from '@nestjs/jwt';
+import { DiscordTokenDto } from 'src/discord/dto/discord.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private readonly discordService: DiscordService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async create(
-    data: CreateUserDto,
-    discordAccessToken: string,
-    discordRefreshToken: string,
-  ) {
+  async create(data: CreateUserDto, discordTokens: string) {
     const { password } = data;
 
     const hash = await argon2.hash(password);
 
+    const tokens = this.jwtService.verify<DiscordTokenDto>(discordTokens);
+
     const discordMe = await firstValueFrom(
-      await this.discordService.me(discordAccessToken),
+      await this.discordService.me(tokens.access_token),
     );
 
     if (!discordMe.verified) throw new UnverifiedDiscordException();
@@ -58,7 +59,7 @@ export class UsersService {
         discriminator: discordMe.discriminator,
         email: discordMe.email,
         username: discordMe.username,
-        refreshToken: discordRefreshToken,
+        refreshToken: tokens.refresh_token,
       });
 
       return user;
