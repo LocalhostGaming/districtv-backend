@@ -1,5 +1,13 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards';
 import { Intent } from '../enums/intent';
 import { DiscordService } from './discord.service';
 
@@ -8,7 +16,7 @@ import { DiscordService } from './discord.service';
 export class DiscordController {
   constructor(private readonly discordService: DiscordService) {}
 
-  @Get('verify')
+  @Get('token/verify')
   @ApiQuery({
     name: 'code',
     type: String,
@@ -19,8 +27,23 @@ export class DiscordController {
     type: String,
     required: true,
   })
-  verify(@Query('code') code: string, @Query('state') state: string) {
+  verifyToken(@Query('code') code: string, @Query('state') state: string) {
     return this.discordService.authorize(code, state);
+  }
+
+  @Post('token/refresh')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiQuery({
+    name: 'refresh_token',
+    type: String,
+    required: true,
+  })
+  refreshToken(
+    @Request() request,
+    @Query('refresh_token') refreshToken: string,
+  ) {
+    return this.discordService.refreshToken(request.user.id, refreshToken);
   }
 
   @Get('authorization-url')

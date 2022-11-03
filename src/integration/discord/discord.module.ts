@@ -15,8 +15,8 @@ import { DiscordController } from './discord.controller';
     }),
     PrismaModule,
   ],
+  controllers: [DiscordController],
   providers: [DiscordService],
   exports: [DiscordService],
-  controllers: [DiscordController],
 })
 export class DiscordModule {}
