@@ -83,7 +83,9 @@ export class DiscordService {
       url.searchParams.append(key, value);
     }
 
-    return url;
+    return {
+      url,
+    };
   }
 
   async authorize(code: string, state: string) {
