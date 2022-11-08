@@ -55,4 +55,14 @@ export class DiscordController {
   authorizationUrl(@Query('intent') intent: Intent) {
     return this.discordService.authorizationUrl(intent);
   }
+
+  @Get('me')
+  @ApiQuery({
+    name: 'access_token',
+    type: String,
+    required: true,
+  })
+  me(@Query('access_token') accessToken: string) {
+    return this.discordService.me(accessToken);
+  }
 }
