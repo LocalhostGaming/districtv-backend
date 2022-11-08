@@ -14,6 +14,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -76,6 +77,19 @@ export class UsersController {
   @ApiOperation({ summary: 'Get currently logged in user details' })
   profile(@Request() request) {
     return request.user;
+  }
+
+  @Get('username/:username')
+  @ApiParam({
+    name: 'username',
+    type: String,
+  })
+  @ApiOperation({ summary: 'Check if username already exists' })
+  async username(@Param('username') username: string) {
+    const hasUsername = await this.usersService.findOne({ username });
+    return {
+      exists: !!hasUsername,
+    };
   }
 
   // GET SINGLE USER
