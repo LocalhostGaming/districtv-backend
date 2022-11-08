@@ -11,6 +11,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
+  InvalidDiscordTokens,
   UserAlreadyExistsException,
   UserRecordNotFoundException,
 } from 'src/errors';
@@ -34,6 +35,8 @@ export class UsersService {
     const { password } = data;
 
     const hash = await argon2.hash(password);
+
+    if (!discordTokens) throw new InvalidDiscordTokens();
 
     const tokens = this.jwtService.verify<DiscordAccessTokenDto>(discordTokens);
 
