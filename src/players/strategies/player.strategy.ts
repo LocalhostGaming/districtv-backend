@@ -11,7 +11,7 @@ export class PlayerStrategy extends PassportStrategy(Strategy, 'player') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: ENV.ACCESS_TOKEN_SECRET,
+      secretOrKey: ENV.JWT_TOKEN_SECRET,
     });
   }
 

@@ -11,29 +11,61 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
+  InvalidDiscordTokens,
   UserAlreadyExistsException,
   UserRecordNotFoundException,
 } from 'src/errors';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { UserSelect } from './users.select';
+import { firstValueFrom } from 'rxjs';
+import { UnverifiedDiscordException } from 'src/errors/discord.exception';
+import { JwtService } from '@nestjs/jwt';
+import { DiscordService } from 'src/integration/discord/discord.service';
+import { DiscordAccessTokenDto } from 'src/integration/discord/dto/discord.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly discordService: DiscordService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async create(data: CreateUserDto) {
+  async create(data: CreateUserDto, discordTokens: string) {
     const { password } = data;
 
     const hash = await argon2.hash(password);
 
+    if (!discordTokens) throw new InvalidDiscordTokens();
+
+    const tokens = this.jwtService.verify<DiscordAccessTokenDto>(discordTokens);
+
+    const discordMe = await firstValueFrom(
+      await this.discordService.me(tokens.access_token),
+    );
+
+    if (!discordMe.verified) throw new UnverifiedDiscordException();
+
     try {
-      return await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: {
           ...data,
+          email: discordMe.email,
           password: hash,
         },
         select: UserSelect,
       });
+
+      await this.discordService.create(user.id, {
+        avatar: discordMe.avatar,
+        discordId: discordMe.id,
+        discriminator: discordMe.discriminator,
+        email: discordMe.email,
+        username: discordMe.username,
+        refreshToken: tokens.refresh_token,
+      });
+
+      return user;
     } catch (error) {
       if (
         isPrismaKnownError(error) &&

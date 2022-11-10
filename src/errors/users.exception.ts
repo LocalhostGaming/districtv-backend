@@ -11,3 +11,9 @@ export class UserRecordNotFoundException extends HttpException {
     super(message ? message : `User does not exists`, HttpStatus.NOT_FOUND);
   }
 }
+
+export class InvalidDiscordTokens extends HttpException {
+  constructor() {
+    super('Discord tokens are required', HttpStatus.BAD_REQUEST);
+  }
+}

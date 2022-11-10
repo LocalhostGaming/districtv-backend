@@ -16,8 +16,8 @@ import { LocalStrategy } from './strategies';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: ENV.ACCESS_TOKEN_SECRET,
-      signOptions: { expiresIn: ENV.ACCESS_TOKEN_EXP },
+      secret: ENV.JWT_TOKEN_SECRET,
+      signOptions: { expiresIn: ENV.JWT_TOKEN_EXP },
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

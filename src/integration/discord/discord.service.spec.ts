@@ -1,30 +1,28 @@
+import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtStrategy } from 'src/auth/strategies';
 import { ENV } from 'src/constants/ENV';
-import { DiscordModule } from 'src/integration/discord/discord.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { DiscordService } from './discord.service';
 
-describe('UserService', () => {
-  let service: UsersService;
+describe('DiscordService', () => {
+  let service: DiscordService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        PrismaModule,
-        DiscordModule,
+        HttpModule,
         JwtModule.register({
           secret: ENV.JWT_TOKEN_SECRET,
+          signOptions: { expiresIn: ENV.JWT_TOKEN_EXP },
         }),
+        PrismaModule,
       ],
-      controllers: [UsersController],
-      providers: [UsersService, JwtStrategy],
-      exports: [UsersService],
+      providers: [DiscordService],
+      exports: [DiscordService],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<DiscordService>(DiscordService);
   });
 
   it('should be defined', () => {

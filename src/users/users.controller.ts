@@ -8,8 +8,16 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { UseZodGuard } from 'nestjs-zod';
 
@@ -37,9 +45,13 @@ export class UsersController {
     description: 'Create User',
     type: CreateUserDto,
   })
+  @ApiQuery({
+    name: 'tokens',
+    type: String,
+  })
   @ApiOperation({ summary: 'Create new user' })
-  create(@Body() data: CreateUserDto) {
-    return this.usersService.create(data);
+  create(@Body() data: CreateUserDto, @Query('tokens') tokens: string) {
+    return this.usersService.create(data, tokens);
   }
 
   // GET ALL USERS
@@ -65,6 +77,19 @@ export class UsersController {
   @ApiOperation({ summary: 'Get currently logged in user details' })
   profile(@Request() request) {
     return request.user;
+  }
+
+  @Get('username/:username')
+  @ApiParam({
+    name: 'username',
+    type: String,
+  })
+  @ApiOperation({ summary: 'Check if username already exists' })
+  async username(@Param('username') username: string) {
+    const hasUsername = await this.usersService.findOne({ username });
+    return {
+      exists: !!hasUsername,
+    };
   }
 
   // GET SINGLE USER
