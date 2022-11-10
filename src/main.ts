@@ -12,6 +12,11 @@ async function bootstrap() {
   patchNestJsSwagger();
 
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   app.setGlobalPrefix(globalPrefix);
 
