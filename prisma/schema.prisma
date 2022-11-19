@@ -77,11 +77,11 @@ model DiscordIntegration {
 }
 
 model TemporaryCode {
-  id         String @id @default(uuid())
-  code       String @unique
+  id         String   @id @default(uuid())
+  code       String   @unique
   userId     String
   discordId  String
-  expiration Int
+  expiration DateTime
 }
 
 model Session {

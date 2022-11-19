@@ -15,6 +15,7 @@ import {
 } from './dto/discord.dto';
 import { Prisma } from '@prisma/client';
 import { Intent } from '../enums/intent';
+import { NoDiscordIntegration } from 'src/errors/discord.exception';
 
 const defaultScopes = ['identify', 'email'];
 const meURL = 'https://discord.com/api/users/@me';
@@ -63,6 +64,18 @@ export class DiscordService {
         throw new HttpException(message, error.response.status);
       }),
     );
+  }
+
+  async getByUserId(userId: string) {
+    const discord = await this.prismaService.discordIntegration.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (!discord) throw new NoDiscordIntegration();
+
+    return discord;
   }
 
   /**

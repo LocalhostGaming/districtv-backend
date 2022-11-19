@@ -8,3 +8,9 @@ export class UnverifiedDiscordException extends HttpException {
     );
   }
 }
+
+export class NoDiscordIntegration extends HttpException {
+  constructor() {
+    super('No Discord Integration Found', HttpStatus.NOT_FOUND);
+  }
+}
