@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PlayersModule } from './players/players.module';
 import { DiscordModule } from './integration/discord/discord.module';
+import { CodesModule } from './codes/codes.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DiscordModule } from './integration/discord/discord.module';
     PlayersModule,
     DiscordModule,
     ConfigModule.forRoot(),
+    CodesModule,
   ],
 })
 export class AppModule {}
