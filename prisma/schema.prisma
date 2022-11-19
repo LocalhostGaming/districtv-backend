@@ -18,6 +18,7 @@ model User {
   role      Role                @default(PLAYER)
   discord   DiscordIntegration?
   player    Player[]
+  session   Session?
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
 }
@@ -73,6 +74,22 @@ model DiscordIntegration {
   discriminator String @unique
   avatar        String
   refreshToken  String
+}
+
+model TemporaryCode {
+  id         String @id @default(uuid())
+  code       String @unique
+  userId     String
+  discordId  String
+  expiration Int
+}
+
+model Session {
+  id        String @id @default(uuid())
+  userId    String @unique
+  User      User   @relation(fields: [userId], references: [id])
+  userAgent String
+  ipAddress String
 }
 
 enum Gender {
