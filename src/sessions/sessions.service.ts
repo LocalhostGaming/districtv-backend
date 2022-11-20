@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ERROR_CODE_DUPLICATE_KEY } from 'src/constants/ERROR_CODES';
+import { SessionDuplicate } from 'src/errors/session.exception';
 import { DiscordService } from 'src/integration/discord/discord.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SessionCodesService } from 'src/sessionCodes/sessionCodes.service';
+import { isPrismaKnownError } from './../helpers/prismaError';
 
 @Injectable()
 export class SessionsService {
@@ -30,20 +33,28 @@ export class SessionsService {
     const discord = await this.discordService.getByUserId(userId);
     const discordId = discord.id;
 
-    // create play session
-    await this.prismaService.session.create({
-      data: {
-        ipAddress,
-        userAgent,
-        userId,
-      },
-    });
+    try {
+      // create play session
+      await this.prismaService.session.create({
+        data: {
+          ipAddress,
+          userAgent,
+          userId,
+        },
+      });
 
-    // sign play token
-    const playToken = this.jwtService.sign({ userId, playerId, discordId });
+      // sign play token
+      const playToken = this.jwtService.sign({ userId, playerId, discordId });
 
-    return {
-      playToken,
-    };
+      return {
+        playToken,
+      };
+    } catch (error: unknown) {
+      if (isPrismaKnownError(error)) {
+        if (error.code === ERROR_CODE_DUPLICATE_KEY) {
+          throw new SessionDuplicate();
+        }
+      }
+    }
   }
 }
