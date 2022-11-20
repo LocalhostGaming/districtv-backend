@@ -6,17 +6,20 @@ export class SessionCodeExpired extends HttpException {
   }
 }
 
-export class InvalidUser extends HttpException {
+export class InvalidSessionCode extends HttpException {
   constructor() {
-    super('The user you provide is not valid', HttpStatus.NOT_ACCEPTABLE);
+    super('Invalid session code', HttpStatus.BAD_REQUEST);
   }
 }
 
-export class InvalidDiscord extends HttpException {
+export class InvalidSessionCodeUser extends HttpException {
   constructor() {
-    super(
-      'The discord user you provide is not valid',
-      HttpStatus.NOT_ACCEPTABLE,
-    );
+    super('Invalid session code user', HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class InvalidSessionCodeDiscord extends HttpException {
+  constructor() {
+    super('Invalid session code discord user', HttpStatus.BAD_REQUEST);
   }
 }

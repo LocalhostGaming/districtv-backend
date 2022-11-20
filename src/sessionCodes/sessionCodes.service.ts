@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RecordNotFoundException } from 'src/errors';
 import {
-  InvalidUser,
+  InvalidSessionCode,
+  InvalidSessionCodeDiscord,
+  InvalidSessionCodeUser,
   SessionCodeExpired,
 } from 'src/errors/sessionCode.exception';
 import { DiscordService } from 'src/integration/discord/discord.service';
 import { uuid } from 'uuidv4';
 import { PrismaService } from '../prisma/prisma.service';
-import { InvalidDiscord } from '../errors/sessionCode.exception';
 
 @Injectable()
 export class SessionCodesService {
@@ -46,26 +46,43 @@ export class SessionCodesService {
     }
   }
 
-  async validate(userId: string, discordId: string, code: string) {
+  async validate(userId: string, code: string) {
     const sessionCode = await this.prismaService.sessionCode.findUnique({
       where: {
         code,
       },
     });
 
-    if (!sessionCode) throw new RecordNotFoundException({ model: 'Code' });
+    if (!sessionCode) throw new InvalidSessionCode();
 
     // Check expiration
-    console.log(sessionCode.expiration.getTime(), new Date().getTime());
     if (new Date().getTime() >= sessionCode.expiration.getTime())
       throw new SessionCodeExpired();
 
     // Check if the claiming user is the same user
-    if (sessionCode.userId !== userId) throw new InvalidUser();
+    if (sessionCode.userId !== userId) throw new InvalidSessionCodeUser();
 
     // Check if the claiming user discord id is the same
-    if (sessionCode.discordId !== discordId) throw new InvalidDiscord();
+    const discord = await this.discordService.getByUserId(userId);
+    if (sessionCode.discordId !== discord.id)
+      throw new InvalidSessionCodeDiscord();
 
     return true;
+  }
+
+  async remove(code: string) {
+    const sessionCode = await this.prismaService.sessionCode.findUnique({
+      where: {
+        code,
+      },
+    });
+
+    if (!sessionCode) throw new InvalidSessionCode();
+
+    return await this.prismaService.sessionCode.delete({
+      where: {
+        code,
+      },
+    });
   }
 }

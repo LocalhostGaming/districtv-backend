@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PlayersModule } from './players/players.module';
 import { DiscordModule } from './integration/discord/discord.module';
 import { SessionCodesModule } from './sessionCodes/sessionCodes.module';
+import { SessionsModule } from './sessions/sessions.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SessionCodesModule } from './sessionCodes/sessionCodes.module';
     PlayersModule,
     DiscordModule,
     SessionCodesModule,
+    SessionsModule,
     ConfigModule.forRoot(),
   ],
 })

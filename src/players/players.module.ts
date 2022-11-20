@@ -10,5 +10,6 @@ import { PlayerStrategy } from './strategies/player.strategy';
   imports: [PrismaModule, CitizenModule, UsersModule],
   controllers: [PlayersController],
   providers: [PlayersService, PlayerStrategy],
+  exports: [PlayersService],
 })
 export class PlayersModule {}
