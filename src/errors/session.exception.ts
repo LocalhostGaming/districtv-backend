@@ -2,6 +2,6 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class SessionDuplicate extends HttpException {
   constructor() {
-    super('Session is already created', HttpStatus.FORBIDDEN);
+    super('Session has already created', HttpStatus.FORBIDDEN);
   }
 }
