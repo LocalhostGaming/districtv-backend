@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class TemporaryCodeExpired extends HttpException {
+export class SessionCodeExpired extends HttpException {
   constructor() {
     super('Code is already expired', HttpStatus.UNAUTHORIZED);
   }

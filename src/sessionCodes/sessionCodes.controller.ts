@@ -1,15 +1,15 @@
 import { Controller, Get, UseGuards, Request } from '@nestjs/common';
-import { TemporaryCodesService } from './temporaryCodes.service';
+import { SessionCodesService } from './sessionCodes.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/roles/roles.guards';
 
-@Controller('codes')
-@ApiTags('Temporary Codes')
+@Controller('session-codes')
+@ApiTags('Session Codes')
 @ApiBearerAuth()
 @UseGuards(RolesGuard)
-export class TemporaryCodesController {
-  constructor(private readonly temporaryCodesService: TemporaryCodesService) {}
+export class SessionCodesController {
+  constructor(private readonly temporaryCodesService: SessionCodesService) {}
 
   @Get('/generate')
   @UseGuards(JwtAuthGuard)

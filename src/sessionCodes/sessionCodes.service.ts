@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { RecordNotFoundException } from 'src/errors';
 import {
   InvalidUser,
-  TemporaryCodeExpired,
-} from 'src/errors/temporaryCode.exception';
+  SessionCodeExpired,
+} from 'src/errors/sessionCode.exception';
 import { DiscordService } from 'src/integration/discord/discord.service';
 import { uuid } from 'uuidv4';
 import { PrismaService } from '../prisma/prisma.service';
-import { InvalidDiscord } from './../errors/temporaryCode.exception';
+import { InvalidDiscord } from '../errors/sessionCode.exception';
 
 @Injectable()
-export class TemporaryCodesService {
+export class SessionCodesService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly discordService: DiscordService,
@@ -27,7 +27,7 @@ export class TemporaryCodesService {
 
       const discord = await this.discordService.getByUserId(userId);
 
-      const codes = await this.prismaService.temporaryCode.create({
+      const codes = await this.prismaService.sessionCode.create({
         data: {
           code,
           discordId: discord.id,
@@ -47,24 +47,24 @@ export class TemporaryCodesService {
   }
 
   async validate(userId: string, discordId: string, code: string) {
-    const temporaryCode = await this.prismaService.temporaryCode.findUnique({
+    const sessionCode = await this.prismaService.sessionCode.findUnique({
       where: {
         code,
       },
     });
 
-    if (!temporaryCode) throw new RecordNotFoundException({ model: 'Code' });
+    if (!sessionCode) throw new RecordNotFoundException({ model: 'Code' });
 
     // Check expiration
-    console.log(temporaryCode.expiration.getTime(), new Date().getTime());
-    if (new Date().getTime() >= temporaryCode.expiration.getTime())
-      throw new TemporaryCodeExpired();
+    console.log(sessionCode.expiration.getTime(), new Date().getTime());
+    if (new Date().getTime() >= sessionCode.expiration.getTime())
+      throw new SessionCodeExpired();
 
     // Check if the claiming user is the same user
-    if (temporaryCode.userId !== userId) throw new InvalidUser();
+    if (sessionCode.userId !== userId) throw new InvalidUser();
 
     // Check if the claiming user discord id is the same
-    if (temporaryCode.discordId !== discordId) throw new InvalidDiscord();
+    if (sessionCode.discordId !== discordId) throw new InvalidDiscord();
 
     return true;
   }
