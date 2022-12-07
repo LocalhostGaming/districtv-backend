@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   InvalidSessionCode,
   InvalidSessionCodeDiscord,
@@ -27,7 +27,7 @@ export class SessionCodesService {
 
       const discord = await this.discordService.getByUserId(userId);
 
-      const codes = await this.prismaService.sessionCode.create({
+      await this.prismaService.sessionCode.create({
         data: {
           code,
           discordId: discord.id,
@@ -35,8 +35,6 @@ export class SessionCodesService {
           userId,
         },
       });
-
-      console.log(codes);
 
       return {
         code,
@@ -71,18 +69,23 @@ export class SessionCodesService {
   }
 
   async remove(code: string) {
-    const sessionCode = await this.prismaService.sessionCode.findUnique({
-      where: {
-        code,
-      },
-    });
+    try {
+      const sessionCode = await this.prismaService.sessionCode.findUnique({
+        where: {
+          code,
+        },
+      });
 
-    if (!sessionCode) throw new InvalidSessionCode();
+      if (!sessionCode) throw new InvalidSessionCode();
 
-    return await this.prismaService.sessionCode.delete({
-      where: {
-        code,
-      },
-    });
+      return await this.prismaService.sessionCode.delete({
+        where: {
+          code,
+        },
+      });
+    } catch (error) {
+      Logger.error((error as any)?.message || 'error');
+      throw error;
+    }
   }
 }
