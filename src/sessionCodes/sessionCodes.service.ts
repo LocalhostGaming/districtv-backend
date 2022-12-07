@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ERROR_CODE_DUPLICATE_KEY } from 'src/constants/ERROR_CODES';
 import {
   InvalidSessionCode,
   InvalidSessionCodeDiscord,
   InvalidSessionCodeUser,
   SessionCodeExpired,
 } from 'src/errors/sessionCode.exception';
+import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { DiscordService } from 'src/integration/discord/discord.service';
 import { uuid } from 'uuidv4';
 import { PrismaService } from '../prisma/prisma.service';
@@ -40,7 +42,13 @@ export class SessionCodesService {
         code,
       };
     } catch (error: unknown) {
-      throw error;
+      if (isPrismaKnownError(error)) {
+        if (error.code === ERROR_CODE_DUPLICATE_KEY) {
+          await this.removeByUserId(userId);
+
+          return await this.generate(userId);
+        }
+      }
     }
   }
 
@@ -66,6 +74,27 @@ export class SessionCodesService {
       throw new InvalidSessionCodeDiscord();
 
     return true;
+  }
+
+  async removeByUserId(userId: string) {
+    try {
+      const sessionCode = await this.prismaService.sessionCode.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (!sessionCode) throw new InvalidSessionCode();
+
+      return await this.prismaService.sessionCode.delete({
+        where: {
+          userId,
+        },
+      });
+    } catch (error) {
+      Logger.error((error as any)?.message || 'error');
+      throw error;
+    }
   }
 
   async remove(code: string) {

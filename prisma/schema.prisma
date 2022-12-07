@@ -79,8 +79,8 @@ model DiscordIntegration {
 model SessionCode {
   id         String   @id @default(uuid())
   code       String   @unique
-  userId     String
-  discordId  String
+  userId     String   @unique
+  discordId  String   @unique
   expiration DateTime
 }
 
