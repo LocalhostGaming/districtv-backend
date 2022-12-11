@@ -8,7 +8,7 @@ import {
 } from 'src/errors/sessionCode.exception';
 import { isPrismaKnownError } from 'src/helpers/prismaError';
 import { DiscordService } from 'src/integration/discord/discord.service';
-import { uuid } from 'uuidv4';
+import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class SessionCodesService {
   async generate(userId: string) {
     try {
       // Generate Random Code
-      const code = uuid();
+      const code = uuidv4();
 
       // Create 10mins Expiration
       const date = new Date();
